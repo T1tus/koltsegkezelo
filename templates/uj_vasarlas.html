@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">🛒 Új vásárlás rögzítése</h2>
+
+<form method="POST" action="{{ url_for('uj_vasarlas') }}" class="row g-3">
+  <div class="col-md-6">
+    <label for="shop_id" class="form-label">Bolt</label>
+    <select name="shop_id" id="shop_id" class="form-select" required>
+      <option value="">Válassz boltot</option>
+      {% for shop in shops %}
+        <option value="{{ shop[0] }}">{{ shop[1] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-6">
+    <label for="product_name" class="form-label">Termék neve</label>
+    <input type="text" name="product_name" id="product_name" class="form-control" required>
+  </div>
+
+  <div class="col-md-3">
+    <label for="unit_price" class="form-label">Egységár (Ft)</label>
+    <input type="number" step="0.01" name="unit_price" id="unit_price" class="form-control" required>
+  </div>
+
+  <div class="col-md-3">
+    <label for="quantity" class="form-label">Darabszám</label>
+    <input type="number" name="quantity" id="quantity" class="form-control" value="1" required>
+  </div>
+
+  <div class="col-md-3 form-check mt-4">
+    <input type="checkbox" name="is_discounted" id="is_discounted" class="form-check-input">
+    <label for="is_discounted" class="form-check-label">Akciós?</label>
+  </div>
+
+  <div class="col-md-3" id="discounted_price_container" style="display: none;">
+    <label for="discounted_price" class="form-label">Akciós ár (Ft)</label>
+    <input type="number" step="0.01" name="discounted_price" id="discounted_price" class="form-control">
+  </div>
+
+  <div class="col-md-6">
+    <label for="purchase_date" class="form-label">Vásárlás dátuma</label>
+    <input type="date" name="purchase_date" id="purchase_date" class="form-control" required>
+  </div>
+
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">✅ Rögzítés</button>
+    <a href="/vasarlasok" class="btn btn-secondary">Vissza</a>
+  </div>
+</form>
+
+<script>
+  const checkbox = document.getElementById('is_discounted');
+  const discountInput = document.getElementById('discounted_price_container');
+  checkbox.addEventListener('change', function () {
+    discountInput.style.display = this.checked ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

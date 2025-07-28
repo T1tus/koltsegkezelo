@@ -1,0 +1,23 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block title %}Főmenü{% endblock %}
+
+{% block content %}
+  <h1>📊 Saját pénzügyi rendszer – Főmenü</h1>
+
+  <div class="list-group">
+    <a href="{{ url_for('transactions') }}" class="list-group-item list-group-item-action">
+      💰 Kiadás / Bevétel rögzítése
+    </a>
+    <a href="{{ url_for('vasarlasok') }}" class="list-group-item list-group-item-action">
+      🛒 Vásárlások összehasonlítása
+    </a>
+    <a href="/vasarlasok/uj" class="list-group-item list-group-item-action">
+        ➕ Új vásárlás rögzítése
+    </a>
+    <a href="{{ url_for('shops') }}" class="list-group-item list-group-item-action">
+      🛒 Boltok felvétele
+    </a>
+  </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Vásárlások{% endblock %}
+
+{% block content %}
+<h2>Vásárlások</h2>
+
+<p>Itt tudod nyilvántartani és összehasonlítani a különböző boltokban történt vásárlásaidat.</p>
+
+<a href="{{ url_for('uj_vasarlas') }}" class="btn btn-primary mb-3">Új vásárlás rögzítése</a>
+
+{% if vasarlasok %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Bolt ID</th>
+      <th>Termék</th>
+      <th>Egységár (Ft)</th>
+      <th>Darabszám</th>
+      <th>Akciós?</th>
+      <th>Akciós ár (Ft)</th>
+      <th>Vásárlás dátuma</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in vasarlasok %}
+    <tr>
+      <td>{{ v[1] }}</td>
+      <td>{{ v[2] }}</td>
+      <td>{{ v[3] }}</td>
+      <td>{{ v[4] }}</td>
+      <td>{{ 'Igen' if v[5] else 'Nem' }}</td>
+      <td>{{ v[6] if v[5] else '-' }}</td>
+      <td>{{ v[7] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Nincsenek vásárlások.</p>
+{% endif %}
+{% endblock %}
