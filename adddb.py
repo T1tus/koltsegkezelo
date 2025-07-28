@@ -4,10 +4,7 @@ conn = sqlite3.connect('data.db')
 c = conn.cursor()
 
 c.execute('''
-    CREATE TABLE IF NOT EXISTS shops (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
-    )
+    ALTER TABLE purchases ADD COLUMN purchase_group_id INTEGER;
 ''')
 
 conn.commit()

@@ -3,6 +3,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 DB = 'data.db'
@@ -118,11 +119,46 @@ def add():
 @app.route('/vasarlasok')
 def vasarlasok():
     conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('SELECT id, shop_id, product_name, unit_price, quantity, is_discounted, discounted_price, purchase_date FROM purchases ORDER BY purchase_date DESC')
-    vasarlasok = c.fetchall()
+
+    # Lekérdezzük a vásárlási csoportokat, boltokkal együtt
+    c.execute('''
+        SELECT 
+            p.purchase_group_id,
+            s.name AS shop_name,
+            s.location,
+            s.note,
+            p.purchase_date,
+            SUM(p.total_price) AS total_sum
+        FROM purchases p
+        JOIN shops s ON p.shop_id = s.id
+        GROUP BY p.purchase_group_id
+        ORDER BY p.purchase_date DESC, p.purchase_group_id DESC
+    ''')
+    grouped = c.fetchall()
+
+    # Minden csoporthoz lekérdezzük a termékeket
+    details = {}
+    for row in grouped:
+        group_id = row['purchase_group_id']
+        c.execute('''
+            SELECT 
+                product_name,
+                quantity,
+                unit_price,
+                is_discounted,
+                discounted_price,
+                total_price
+            FROM purchases
+            WHERE purchase_group_id = ?
+        ''', (group_id,))
+        details[group_id] = c.fetchall()
+
     conn.close()
-    return render_template('vasarlasok.html', vasarlasok=vasarlasok)
+
+    return render_template('vasarlasok.html', grouped_purchases=grouped, all_details=details)
+
 
 
 
@@ -137,20 +173,35 @@ def uj_vasarlas():
 
     if request.method == 'POST':
         shop_id = request.form['shop_id']
-        product_name = request.form['product_name']
-        unit_price = float(request.form['unit_price'])
-        quantity = int(request.form['quantity'])
-        is_discounted = int('is_discounted' in request.form)
-        discounted_price = request.form.get('discounted_price')
-        discounted_price = float(discounted_price) if discounted_price else None
         purchase_date = request.form['purchase_date']
 
-        total_price = (discounted_price if is_discounted and discounted_price else unit_price) * quantity
+        # 1. Beszúrunk egy új purchase_group_id-t a vásárlás azonosítására
+        purchase_group_id = str(uuid.uuid4())
+        
 
-        c.execute('''
-            INSERT INTO purchases (shop_id, product_name, unit_price, quantity, total_price, is_discounted, discounted_price, purchase_date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (shop_id, product_name, unit_price, quantity, total_price, is_discounted, discounted_price, purchase_date))
+        # 2. Tömbként kérjük le a tételek adatait
+        product_names = request.form.getlist('product_name[]')
+        unit_prices = request.form.getlist('unit_price[]')
+        quantities = request.form.getlist('quantity[]')
+        is_discounteds = request.form.getlist('is_discounted[]')
+        discounted_prices = request.form.getlist('discounted_price[]')
+
+        # 3. Végigmegyünk a tételeken és mindegyiket beszúrjuk a purchases táblába
+        for i in range(len(product_names)):
+            product_name = product_names[i]
+            unit_price = float(unit_prices[i])
+            quantity = int(quantities[i])
+            is_discounted = 1 if i < len(is_discounteds) and is_discounteds[i] == 'on' else 0
+            discounted_price = discounted_prices[i] if i < len(discounted_prices) and discounted_prices[i] != '' else None
+            discounted_price = float(discounted_price) if discounted_price else None
+
+            total_price = (discounted_price if is_discounted and discounted_price else unit_price) * quantity
+
+            c.execute('''
+                INSERT INTO purchases 
+                (shop_id, product_name, unit_price, quantity, total_price, is_discounted, discounted_price, purchase_date, purchase_group_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (shop_id, product_name, unit_price, quantity, total_price, is_discounted, discounted_price, purchase_date, purchase_group_id))
 
         conn.commit()
         conn.close()

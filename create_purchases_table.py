@@ -4,16 +4,11 @@ conn = sqlite3.connect('data.db')
 c = conn.cursor()
 
 c.execute('''
-CREATE TABLE IF NOT EXISTS purchases (
+CREATE TABLE IF NOT EXISTS purchase_group (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    shop_id INTEGER,
-    product_name TEXT NOT NULL,
-    unit_price REAL NOT NULL,
-    quantity INTEGER NOT NULL,
-    total_price REAL NOT NULL,
-    is_discounted INTEGER DEFAULT 0,
-    discounted_price REAL,
+    shop_id INTEGER NOT NULL,
     purchase_date TEXT NOT NULL,
+    note TEXT,
     FOREIGN KEY (shop_id) REFERENCES shops(id)
 )
 ''')
@@ -21,4 +16,4 @@ CREATE TABLE IF NOT EXISTS purchases (
 conn.commit()
 conn.close()
 
-print("✅ purchases tábla sikeresen létrehozva a data.db-ben.")
+print("✅ purchases_group tábla sikeresen létrehozva a data.db-ben.")
