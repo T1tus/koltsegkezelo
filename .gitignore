@@ -1,0 +1,21 @@
+# Python cache fájlok
+__pycache__/
+*.py[cod]
+
+# SQLite adatbázis fájlok
+# *.db
+
+# VS Code szerkesztő beállítások
+.vscode/
+
+# Log vagy ideiglenes fájlok
+*.log
+*.tmp
+
+# OS által generált fájlok
+.DS_Store
+Thumbs.db
+
+# Virtuális környezet mappák (ha használnál)
+env/
+venv/
