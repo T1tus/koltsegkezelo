@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 
 # SQLite adatbázis fájlok
-# *.db
+*.db
 
 # VS Code szerkesztő beállítások
 .vscode/
